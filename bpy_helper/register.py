@@ -6,6 +6,7 @@ from typing import List
 
 class ModuleRegisterHelper:
     def __init__(self, module_names: List[str], package: str) -> None:
+        self._package = package
         self.modules = [importlib.import_module(name, package) for name in module_names]
 
     def register(self):
@@ -22,11 +23,6 @@ class ModuleRegisterHelper:
             except Exception:
                 print_exc()
 
-
-# Based on https://devtalk.blender.org/t/plugin-hot-reload-by-cleaning-sys-modules/20040
-def cleanse_modules(package: str):
-    """search for your plugin modules in blender python sys.modules and remove them"""
-
-    for module_name in list(sys.modules.keys()):
-        if module_name.startswith(package):
-            del sys.modules[module_name]
+        for module_name in list(sys.modules.keys()):
+            if module_name.startswith(self._package):
+                del sys.modules[module_name]
