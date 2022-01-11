@@ -47,12 +47,12 @@ def longest_span_direction(points: np.ndarray):
     return longest_span_direction
 
 
-def max_face_normal_by_z_value(obj: bpy.types.Object):
-    # FIXME: make it work for transformed objects
-    data: bpy.types.Mesh = obj.data
-    faces = data.polygons
+def max_face_normal_by_global_z(obj: bpy.types.Object) -> np.ndarray:
+    up_vec = obj.matrix_world.col[2]
+    faces = obj.data.polygons
+    if len(faces) == 0:
+        raise RuntimeError(f"{obj} has 0 faces")
     face_normals_arr = np.empty(len(faces) * 3)
     faces.foreach_get("normal", face_normals_arr)
     face_normals_arr.shape = -1, 3
-    max_normal_by_z_value: np.ndarray = face_normals_arr[face_normals_arr[:, 2].argmax()]
-    return max_normal_by_z_value
+    return face_normals_arr[face_normals_arr.dot(up_vec).argmax()]
