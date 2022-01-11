@@ -10,6 +10,9 @@ import bmesh
 def bm_extrude_faces_move(bm: bmesh.types.BMesh, faces_to_be_extruded: List[bmesh.types.BMFace], translation: Vector):
     extrude_map = dict()
 
+    for f in bm.faces:
+        f.tag = False
+
     for f in faces_to_be_extruded:
         f.tag = True
 
