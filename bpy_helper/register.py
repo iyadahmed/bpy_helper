@@ -1,25 +1,32 @@
 import importlib
 import sys
-
 from traceback import print_exc
+from typing import List
 
 
 class ModuleRegisterHelper:
-    def __init__(self, parent_module_name, module_names) -> None:
-        self.full_module_names = [f"{parent_module_name}.{name}" for name in module_names]
-        for name in self.full_module_names:
-            importlib.import_module(name)
+    def __init__(self, module_names: List[str], package: str) -> None:
+        self.modules = [importlib.import_module(name, package) for name in module_names]
 
     def register(self):
-        for name in self.full_module_names:
+        for m in self.modules:
             try:
-                sys.modules[name].register()
+                m.register()
             except Exception:
                 print_exc()
 
     def unregister(self):
-        for name in reversed(self.full_module_names):
+        for m in reversed(self.modules):
             try:
-                sys.modules[name].unregister()
+                m.unregister()
             except Exception:
                 print_exc()
+
+
+# Based on https://devtalk.blender.org/t/plugin-hot-reload-by-cleaning-sys-modules/20040
+def cleanse_modules(package: str):
+    """search for your plugin modules in blender python sys.modules and remove them"""
+
+    for module_name in list(sys.modules.keys()):
+        if module_name.startswith(package):
+            del sys.modules[module_name]
