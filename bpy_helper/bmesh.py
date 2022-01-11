@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Callable, List
 
 import bpy
@@ -116,26 +117,21 @@ class BMRegion:
             bm.faces.new([vert_map[v] for v in f.verts])
 
 
-def _bm_grow_tagged(
-    vert: bmesh.types.BMVert,
-    verts_filter: Callable[[bmesh.types.BMVert], bool],
-    edges_filter: Callable[[bmesh.types.BMEdge], bool],
-    faces_filter: Callable[[bmesh.types.BMFace], bool],
-):
+def _bm_grow_tagged(vert: bmesh.types.BMVert):
     """Flood fill untagged linked geometry starting from a vertex, tags and returns them"""
     verts = [vert]
     edges: List[bmesh.types.BMEdge] = []
     faces: List[bmesh.types.BMFace] = []
 
-    for vert in filter(verts_filter, verts):
+    for vert in verts:
         link_face: bmesh.types.BMFace
-        for link_face in filter(faces_filter, vert.link_faces):
+        for link_face in vert.link_faces:
             if link_face.tag:
                 continue
             faces.append(link_face)
             link_face.tag = True
         link_edge: bmesh.types.BMEdge
-        for link_edge in filter(edges_filter, vert.link_edges):
+        for link_edge in vert.link_edges:
             if link_edge.tag:
                 continue
             link_edge.tag = True
@@ -162,24 +158,24 @@ def bm_yield_loose_parts(
     edges_filter: Callable[[bmesh.types.BMEdge], bool] = None,
     faces_filter: Callable[[bmesh.types.BMFace], bool] = None,
 ):
-    """WARNING: this modifies bmesh tags"""
     assert bm
     assert bm.is_valid
 
-    # Clear tags
-    for v in filter(verts_filter, bm.verts):
-        v.tag = False
-    for e in filter(edges_filter, bm.edges):
-        e.tag = False
-    for f in filter(faces_filter, bm.faces):
-        f.tag = False
+    # Set tags
+    # Set elements that pass the filters to True in order to exclude them from the flood fill
+    # tag values are not set during evaluation, as filter might depend on tag
+    tag_values = dict()
+    for v in bm.verts:
+        tag_values[v] = False if verts_filter(v) else True
+    for e in bm.edges:
+        tag_values[e] = False if edges_filter(e) else True
+    for f in bm.faces:
+        tag_values[f] = False if faces_filter(f) else True
 
-    # TODO: tag geometry that fails the filter instead of passing the filter
-    # if so then do not actually set tag while evaluating filter,
-    # but rather store tag in a dict or so, then apply after evaluating filter for all geometry,
-    # because filter might depend on tag
+    for e in chain(bm.verts, bm.edges, bm.faces):
+        e.tag = tag_values[e]
 
-    for seed_vert in filter(verts_filter, bm.verts):
+    for seed_vert in bm.verts:
         if seed_vert.tag:
             continue
-        yield _bm_grow_tagged(seed_vert, verts_filter, edges_filter, faces_filter)
+        yield _bm_grow_tagged(seed_vert)
