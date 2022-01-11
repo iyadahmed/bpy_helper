@@ -14,14 +14,14 @@ class BaseMultiStateModal(Protocol):
         ...
 
     def pre_modal_handler(self, context, event) -> Optional[Set[str]]:
-        # an event handler gets executed before modal handler
-        # if it returns {"RUNNING_MODAL"}, then _modal_handler will be executed after
+        """an event handler that is executed before modal handler,
+        if it returns {"RUNNING_MODAL"}, then _modal_handler will be executed after"""
         ...
 
     def set_modal_handler(self, modal_handler: Callable[[bpy.types.Context, bpy.types.Event], Set[str]]):
         self._modal_handler = modal_handler
 
-    def invoke(self, context, event):
+    def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
         self.setup(context)
         context.window_manager.modal_handler_add(self)
         return {"RUNNING_MODAL"}
