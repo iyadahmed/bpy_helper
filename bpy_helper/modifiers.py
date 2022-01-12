@@ -30,7 +30,7 @@ def apply_modifiers(context: bpy.types.Context, obj: bpy.types.Object, target_mo
 
 
 def apply_modifier_by_name(obj: bpy.types.Object, modifier_name: str):
-    bpy.ops.object.modifier_apply({"object": obj}, modifier=modifier_name)
+    apply_modifiers(bpy.context, obj, [obj.modifiers[modifier_name]])
 
 
 def create_boolean_modifier_obj_obj_fast(obj_first, obj_second, operation):
