@@ -25,8 +25,11 @@ class CommandQueue:
         cmd = self.queue.popleft()
         cmd.execute()
 
-    def get_num_completed(self):
-        return self._num_added_commands - len(self.queue)
+    def get_progress(self):
+        """Value in range 0. to 1. indicating progress"""
+        if self._num_added_commands == 0:
+            return 1.0
+        return 1 - (len(self.queue) / self._num_added_commands)
 
     def is_finished(self):
         return len(self.queue) == 0
