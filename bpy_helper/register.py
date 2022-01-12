@@ -5,9 +5,10 @@ from typing import List
 
 
 class ModuleRegisterHelper:
-    def __init__(self, module_names: List[str], package: str) -> None:
-        self._package = package
-        self.modules = [importlib.import_module(name, package) for name in module_names]
+    def __init__(self, parent_module_name: str, module_names: List[str]) -> None:
+        self._parent_module_name = parent_module_name
+        print(parent_module_name)
+        self.modules = [importlib.import_module(f"{parent_module_name}.{name}") for name in module_names]
 
     def register(self):
         for m in self.modules:
@@ -24,5 +25,9 @@ class ModuleRegisterHelper:
                 print_exc()
 
         for module_name in list(sys.modules.keys()):
-            if module_name.startswith(self._package):
+            if module_name.startswith(self._parent_module_name):
+                print(module_name)
                 del sys.modules[module_name]
+
+    def get_register_unregister(self):
+        return self.register, self.unregister
