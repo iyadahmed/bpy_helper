@@ -13,7 +13,7 @@ def create_boolean_modifier_obj_obj_fast(obj_first, obj_second, operation):
     return mod
 
 
-def create_boolean_modifier_obj_obj_exact(obj_first, obj_second, operation, use_hole_tolerant, use_self):
+def create_boolean_modifier_obj_obj_exact(obj_first, obj_second, operation, use_hole_tolerant=False, use_self=False):
     mod: bpy.types.BooleanModifier = obj_first.modifiers.new("", "BOOLEAN")
     mod.solver = "EXACT"
     mod.operation = operation
