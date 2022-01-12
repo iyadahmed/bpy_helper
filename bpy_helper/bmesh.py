@@ -152,6 +152,21 @@ def _bm_grow_tagged(vert: bmesh.types.BMVert):
     return BMRegion(verts, edges, faces)
 
 
+def _set_bmelem_tags_false_filter(elems, filter_func):
+    """Sets tag for BMesh elements to False if they pass the filter (filter returns True),
+    otherwise set tag to True, if filter is None, all tags are set to False"""
+    if filter_func is None:
+        for e in elems:
+            e.tag = False
+    else:
+        # Defer setting of tags as filter might depend on original tag
+        tag_values = dict()
+        for e in elems:
+            tag_values[e] = False if filter_func(e) else True
+        for e in elems:
+            e.tag = tag_values[e]
+
+
 def bm_yield_loose_parts(
     bm: bmesh.types.BMesh,
     verts_filter: Callable[[bmesh.types.BMVert], bool] = None,
@@ -161,19 +176,12 @@ def bm_yield_loose_parts(
     assert bm
     assert bm.is_valid
 
-    # Set tags
-    # Set elements that pass the filters to True in order to exclude them from the flood fill
-    # tag values are not set during evaluation, as filter might depend on tag
-    tag_values = dict()
-    for v in bm.verts:
-        tag_values[v] = False if verts_filter(v) else True
-    for e in bm.edges:
-        tag_values[e] = False if edges_filter(e) else True
-    for f in bm.faces:
-        tag_values[f] = False if faces_filter(f) else True
-
-    for e in chain(bm.verts, bm.edges, bm.faces):
-        e.tag = tag_values[e]
+    # Tag all elements as False to be included in the flood fill search,
+    # if filter is not None, tags that pass the filter (filter returns True)
+    # will be set to True so they don't get included in the search
+    _set_bmelem_tags_false_filter(bm.verts, verts_filter)
+    _set_bmelem_tags_false_filter(bm.edges, edges_filter)
+    _set_bmelem_tags_false_filter(bm.faces, faces_filter)
 
     for seed_vert in bm.verts:
         if seed_vert.tag:
