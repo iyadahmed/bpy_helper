@@ -1,4 +1,32 @@
 import bpy
+from typing import List
+
+
+def apply_modifiers(context: bpy.types.Context, obj: bpy.types.Object, target_mods: List[bpy.types.Modifier]):
+    for mod in target_mods:
+        assert mod.id_data == obj
+
+    viewport_visibility_original = dict()
+    mod: bpy.types.Modifier
+    for mod in obj.modifiers:
+        viewport_visibility_original[mod] = mod.show_viewport
+        mod.show_viewport = False
+
+    # No need to store original visibility for target mods
+    # they shall be deleted soon
+    for mod in target_mods:
+        mod.show_viewport = True
+
+    dg = context.evaluated_depsgraph_get()
+    mesh = bpy.data.meshes.new_from_object(obj.evaluated_get(dg))
+
+    for mod in target_mods:
+        obj.modifiers.remove(mod)
+
+    obj.data = mesh
+
+    for mod in obj.modifiers:
+        mod.show_viewport = viewport_visibility_original[mod]
 
 
 def apply_modifier_by_name(obj: bpy.types.Object, modifier_name: str):
