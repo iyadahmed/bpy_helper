@@ -90,5 +90,5 @@ def select_object(context: bpy.types.Context, obj: bpy.types.Object):
 
 
 def activate_object(context: bpy.types.Context, obj: bpy.types.Object):
-    select_object(obj)  # objects cannot be active if they are not selected
+    select_object(context, obj)  # objects cannot be active if they are not selected
     context.view_layer.objects.active = obj
