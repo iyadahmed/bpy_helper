@@ -1,3 +1,4 @@
+from mathutils import Matrix, Vector
 import numpy as np
 
 
@@ -38,5 +39,9 @@ def line_line_intersection_2d(v1, v2, v3, v4, epsilon=0.000001):
     return t * (x2 - x1), t * (y2 - y1)
 
 
-def transform_normal(mat: np.ndarray, vec: np.ndarray):
-    return vec.dot(np.linalg.inv(mat))  # reduced from inv(mat).T.T
+def transform_normal_np(mat_3x3: np.ndarray, vec3: np.ndarray):
+    return vec3.dot(np.linalg.inv(mat_3x3))  # reduced from inv(mat).T.T
+
+
+def transform_normal(mat: Matrix, vec: Vector) -> Vector:
+    return mat.inverted_safe().transposed() @ vec
