@@ -38,7 +38,12 @@ class ABC_draw_handler(ABC):
 
     def register(self):
         REGISTERED_DRAW_HANDLERS_GLOBAL.add(self)
-        self.space_type.draw_handler_add(staticmethod(self.draw), (self,), self.region_type, self.draw_type)
+        self.init()
+        # draw must be unbound on Blender >= 3.0.0
+        def draw_unbound(draw_handler):
+            draw_handler.draw()
+
+        self.__rna_handle = self.space_type.draw_handler_add(draw_unbound, (self,), self.region_type, self.draw_type)
 
     def unregister(self):
         if self.__rna_handle is None:
