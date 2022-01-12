@@ -3,7 +3,7 @@ from bpy_extras import view3d_utils
 
 
 def region_2d_to_ray_view3d(context: bpy.types.Context, x: int, y: int):
-    """Returns ray origin and direction in world coordinates from a location in the active View3D 2D region"""
+    """Returns a tuple (ray_origin, ray_direction) in world space"""
     region = context.region
     region_view_3d = context.region_data
     coord = x, y
