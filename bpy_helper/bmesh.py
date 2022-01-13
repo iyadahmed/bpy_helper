@@ -1,4 +1,3 @@
-from itertools import chain
 from typing import Callable, List
 
 import bpy
