@@ -1,6 +1,5 @@
-import logging
 from abc import ABC, abstractmethod
-from typing import Type, List, Set
+from typing import Type, Set
 
 from traceback import print_exc
 
@@ -96,6 +95,9 @@ class View3DText(ABC_draw_handler):
 
 
 def unregister_all_draw_handlers():
-    for handler in REGISTERED_DRAW_HANDLERS_GLOBAL:
-        handler.unregister()
-    REGISTERED_DRAW_HANDLERS_GLOBAL.clear()
+    # set must be copied because unregister method modifies the set
+    for handler in REGISTERED_DRAW_HANDLERS_GLOBAL.copy():
+        try:
+            handler.unregister()
+        except Exception:
+            print_exc()
