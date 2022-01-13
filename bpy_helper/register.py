@@ -1,5 +1,4 @@
 import importlib
-import sys
 from traceback import print_exc
 from typing import List
 
@@ -23,11 +22,6 @@ class ModuleRegisterHelper:
                 m.unregister()
             except Exception:
                 print_exc()
-
-        for module_name in list(sys.modules.keys()):
-            if module_name.startswith(self._parent_module_name):
-                print(module_name)
-                del sys.modules[module_name]
 
     def get_register_unregister(self):
         return self.register, self.unregister
