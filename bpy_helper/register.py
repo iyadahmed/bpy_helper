@@ -1,6 +1,16 @@
 import importlib
+import sys
 from traceback import print_exc
 from typing import List
+
+
+# Based on https://devtalk.blender.org/t/plugin-hot-reload-by-cleaning-sys-modules/20040
+def cleanse_modules(parent_module_name):
+    """search for your plugin modules in blender python sys.modules and remove them"""
+
+    for module_name in list(sys.modules.keys()):
+        if module_name.startswith(parent_module_name):
+            del sys.modules[module_name]
 
 
 class ModuleRegisterHelper:
