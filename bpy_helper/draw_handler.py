@@ -6,10 +6,10 @@ from traceback import print_exc
 import blf
 import bpy
 
-REGISTERED_DRAW_HANDLERS_GLOBAL: Set["ABC_draw_handler"] = set()
+REGISTERED_DRAW_HANDLERS_GLOBAL: Set["AbstractDrawHandler"] = set()
 
 
-class ABC_draw_handler(ABC):
+class AbstractDrawHandler(ABC):
     __rna_handle = None
 
     @property
@@ -53,7 +53,7 @@ class ABC_draw_handler(ABC):
 
 
 # Example
-class View3DText(ABC_draw_handler):
+class DrawView3DText(AbstractDrawHandler):
     space_type = bpy.types.SpaceView3D
     draw_type = "POST_PIXEL"
     region_type = "WINDOW"
