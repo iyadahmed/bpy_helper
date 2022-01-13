@@ -4,7 +4,7 @@ import bpy
 
 import bmesh
 
-from .bmesh import bm_yield_loose_parts
+from .bmesh import bm_loose_parts
 
 
 def obj_mesh_copy(obj: bpy.types.Object):
@@ -21,7 +21,7 @@ def obj_mesh_copy(obj: bpy.types.Object):
 def obj_get_loose_parts(obj: bpy.types.Object):
     bm = bmesh.new()
     bm.from_mesh(obj.data)
-    loose_parts = [region.to_obj(obj.name) for region in bm_yield_loose_parts(bm)]
+    loose_parts = [region.to_obj(obj.name) for region in bm_loose_parts(bm)]
     bm.free()
     return loose_parts
 

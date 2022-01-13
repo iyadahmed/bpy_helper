@@ -167,7 +167,7 @@ def _set_bmelem_tags_false_filter(elems, filter_func):
             e.tag = tag_values[e]
 
 
-def bm_yield_loose_parts(
+def bm_loose_parts(
     bm: bmesh.types.BMesh,
     verts_filter: Callable[[bmesh.types.BMVert], bool] = None,
     edges_filter: Callable[[bmesh.types.BMEdge], bool] = None,
@@ -183,7 +183,14 @@ def bm_yield_loose_parts(
     _set_bmelem_tags_false_filter(bm.edges, edges_filter)
     _set_bmelem_tags_false_filter(bm.faces, faces_filter)
 
+    loose_parts: List[BMRegion] = []
+
     for seed_vert in bm.verts:
         if seed_vert.tag:
             continue
-        yield _bm_grow_tagged(seed_vert)
+        # We could yield instead
+        # but tag could be modifed after yield
+        # so better to store results in a list
+        loose_parts.append(_bm_grow_tagged(seed_vert))
+
+    return loose_parts
