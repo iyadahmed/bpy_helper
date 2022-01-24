@@ -4,7 +4,7 @@ import bpy
 
 import bmesh
 
-from .bmesh import bm_loose_parts
+from .bmesh.bmesh import bm_loose_parts
 
 
 def obj_mesh_copy(obj: bpy.types.Object):
