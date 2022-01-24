@@ -119,14 +119,19 @@ def bisect_fill(bm: BMesh, plane_co: Vector, plane_normal: Vector):
         bm.faces.new((v0, v1, v2))
 
     verts_to_be_smoothed = []
+    boundary_verts = []
     for v in delauny_verts_bm_out:
         if next((e for e in v.link_edges if e.is_boundary), None) is None:
             verts_to_be_smoothed.append(v)
+        else:
+            boundary_verts.append(v)
 
     for _ in range(10):
         bmesh.ops.smooth_vert(
             bm, verts=verts_to_be_smoothed, factor=1, use_axis_x=True, use_axis_y=True, use_axis_z=True
         )
+
+    bmesh.ops.remove_doubles(bm, verts=delauny_verts_input + boundary_verts, dist=0.0001)
 
 
 if __name__ == "__main__":
