@@ -118,6 +118,16 @@ def bisect_fill(bm: BMesh, plane_co: Vector, plane_normal: Vector):
         v2 = delauny_verts_bm_out[df[2]]
         bm.faces.new((v0, v1, v2))
 
+    verts_to_be_smoothed = []
+    for v in delauny_verts_bm_out:
+        if next((e for e in v.link_edges if e.is_boundary), None) is None:
+            verts_to_be_smoothed.append(v)
+
+    for _ in range(10):
+        bmesh.ops.smooth_vert(
+            bm, verts=verts_to_be_smoothed, factor=1, use_axis_x=True, use_axis_y=True, use_axis_z=True
+        )
+
 
 if __name__ == "__main__":
     edit_mesh = bpy.context.object.data
