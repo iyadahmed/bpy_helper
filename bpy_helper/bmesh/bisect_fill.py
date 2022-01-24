@@ -1,9 +1,32 @@
 import bpy
 from mathutils import Vector
-from mathutils.geometry import delaunay_2d_cdt
+from mathutils.geometry import area_tri, delaunay_2d_cdt
+from numpy.random import default_rng
 
 import bmesh
-from bmesh.types import BMesh, BMVert, BMEdge
+from bmesh.types import BMEdge, BMesh, BMVert
+
+RNG = default_rng(12345)
+
+
+def sample_tri(a, b, c, u, v):
+    u = float(u)
+    v = float(v)
+    if (u + v) > 1:
+        u = 1 - u
+        v = 1 - v
+    return c + u * (a - c) + v * (b - c)
+
+
+def sample_tri_randn(a, b, c, n):
+    for u, v in RNG.random((n, 2)):
+        yield sample_tri(a, b, c, u, v)
+
+
+def sample_tri_rand_desnity(a, b, c, density):
+    """Desnity in points per area unit"""
+    n = int(density * area_tri(a, b, c))
+    yield from sample_tri_randn(a, b, c, n)
 
 
 def project_point_to_plane(point_co, plane_co, plane_normal):
@@ -44,6 +67,10 @@ def bisect_fill(bm: BMesh, plane_co: Vector, plane_normal: Vector):
     rot_mat = plane_normal.rotation_difference((0, 0, 1)).to_matrix()
     rot_mat_inv = rot_mat.inverted_safe()
 
+    delauny_input_verts_co = [
+        (rot_mat_inv @ project_point_to_plane(v.co, plane_co, plane_normal))[:2] for v in delauny_verts_input
+    ]
+
     (
         delauny_verts_co,
         delauny_edges,
@@ -52,7 +79,29 @@ def bisect_fill(bm: BMesh, plane_co: Vector, plane_normal: Vector):
         delauny_orig_edges,
         delauny_orig_faces,
     ) = delaunay_2d_cdt(
-        [(rot_mat_inv @ project_point_to_plane(v.co, plane_co, plane_normal))[:2] for v in delauny_verts_input],
+        delauny_input_verts_co,
+        delauny_edges_input,
+        [],
+        1,
+        0.00001,
+    )
+
+    extra_delauny_input_points = []
+    for df in delauny_faces:
+        v0 = delauny_verts_co[df[0]].to_3d()
+        v1 = delauny_verts_co[df[1]].to_3d()
+        v2 = delauny_verts_co[df[2]].to_3d()
+        extra_delauny_input_points.extend(co.to_2d() for co in sample_tri_rand_desnity(v0, v1, v2, 1))
+
+    (
+        delauny_verts_co,
+        delauny_edges,
+        delauny_faces,
+        delauny_orig_verts,
+        delauny_orig_edges,
+        delauny_orig_faces,
+    ) = delaunay_2d_cdt(
+        delauny_input_verts_co + extra_delauny_input_points,
         delauny_edges_input,
         [],
         1,
