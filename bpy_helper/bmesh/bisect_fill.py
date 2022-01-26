@@ -65,10 +65,12 @@ def bisect_fill(bm: BMesh, plane_co: Vector, plane_normal: Vector):
         delauny_edges_input.append((v0_index, v1_index))
 
     rot_mat = plane_normal.rotation_difference((0, 0, 1)).to_matrix()
+    rot_mat_t = rot_mat.transposed()
     rot_mat_inv = rot_mat.inverted_safe()
+    rot_mat_inv_t = rot_mat_inv.transposed()
 
     delauny_input_verts_co = [
-        (rot_mat_inv @ project_point_to_plane(v.co, plane_co, plane_normal))[:2] for v in delauny_verts_input
+        (rot_mat_inv_t @ project_point_to_plane(v.co, plane_co, plane_normal))[:2] for v in delauny_verts_input
     ]
 
     (
@@ -109,7 +111,7 @@ def bisect_fill(bm: BMesh, plane_co: Vector, plane_normal: Vector):
     )
 
     delauny_verts_bm_out = [
-        bm.verts.new(project_point_to_plane(co.to_3d(), plane_co, plane_normal)) for co in delauny_verts_co
+        bm.verts.new(project_point_to_plane(rot_mat_t @ co.to_3d(), plane_co, plane_normal)) for co in delauny_verts_co
     ]
 
     for df in delauny_faces:
