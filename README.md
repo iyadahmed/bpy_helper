@@ -3,7 +3,7 @@ Helper module for Blender Python developers
 
 discuss here: https://discord.gg/aTTvRJpU85
 
-## getting started
+## Getting Started
 - copy this folder or individual modules into your addon
 - import the functions as needed
 ```python
