@@ -24,7 +24,7 @@ def sample_tri_randn(a, b, c, n):
 
 
 def sample_tri_rand_desnity(a, b, c, density):
-    """Desnity in points per area unit"""
+    """Density in points per area unit"""
     n = int(density * area_tri(a, b, c))
     yield from sample_tri_randn(a, b, c, n)
 
