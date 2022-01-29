@@ -86,3 +86,4 @@ def pseudo_minimum_bounding_cylinder(obj):
         cylinders.append(Cylinder(radius, depth, up))
 
     min_cylinder = min(cylinders, key=lambda c: c.calc_volume())
+    return min_cylinder
