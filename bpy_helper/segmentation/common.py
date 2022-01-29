@@ -25,7 +25,7 @@ def pca_aligned_span(points: np.ndarray):
     bb_min = aligned.min(axis=0)
     bb_max = aligned.max(axis=0)
 
-    span: np.ndarray = bb_max - bb_min
+    span: np.ndarray = bb_max - bb_min  # NOTE: possible overflow
     return span, change_of_basis_mat
 
 
@@ -56,3 +56,10 @@ def max_face_normal_by_global_z(obj: bpy.types.Object) -> np.ndarray:
     faces.foreach_get("normal", face_normals_arr)
     face_normals_arr.shape = -1, 3
     return face_normals_arr[face_normals_arr.dot(up_vec).argmax()]
+
+
+def flatten(points: np.ndarray):
+    """Return a version of points falttened to best fit plane"""
+    pca_mat = pca(points)
+    pca_mat_inv = np.linalg.inv(pca_mat)
+    return (points - points.mean(axis=0)).dot(pca_mat_inv.T)
