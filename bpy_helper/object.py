@@ -1,12 +1,12 @@
 from typing import List
 
 import bpy
+from mathutils import Matrix, Vector
 
 import bmesh
 
 from .bmesh.bmesh import bm_loose_parts
 
-from mathutils import Matrix, Vector
 
 def obj_mesh_copy(obj: bpy.types.Object):
     bm = bmesh.new(use_operators=False)
@@ -94,24 +94,23 @@ def activate_object(context: bpy.types.Context, obj: bpy.types.Object):
     select_object(context, obj)  # objects cannot be active if they are not selected
     context.view_layer.objects.active = obj
 
-def set_origin(obj, location, matrix=Matrix()):
-    # object, xyz location
-    # move an object to a xyz vector
+
+def set_origin(obj: bpy.types.Object, location: Vector):
     me = obj.data
     mw = obj.matrix_world
-    location = matrix.inverted() @ location
     me.transform(Matrix.Translation(-location))
     mw.translation = mw @ location
 
-def get_center_bounds(obj, axis="z", dir="-", matrix=Matrix()):
-    # get origins for any point in bounding box by changing axis and + or -
-    local_verts = [matrix @ Vector(v[:]) for v in obj.bound_box]
-    location = sum(local_verts, Vector()) / 8
-    if dir == "-":
-        location[axis] = min(v[axis] for v in local_verts)
-    else:
-        location[axis] = max(v[axis] for v in local_verts)
-    return location
 
-def move_object_to_object(objMoveFrom,objMoveTo):
-    objMoveFrom.matrix_world.translation = objMoveTo.matrix_world.translation.copy()
+def get_center_bounds(obj: bpy.types.Object, axis="z", dir="-"):
+    # get origins for any point in bounding box by changing axis and + or -
+    bb_center = sum((v.co / 8 for v in obj.bound_box), Vector())
+    if dir == "-":
+        bb_center[axis] = min(v.co[axis] for v in obj.bound_box)
+    else:
+        bb_center[axis] = max(v.co[axis] for v in obj.bound_box)
+    return bb_center
+
+
+def obj_copy_translation(obj_from: bpy.types.Object, obj_to: bpy.types.Object):
+    obj_to.matrix_world.translation = obj_from.matrix_world.translation.copy()
