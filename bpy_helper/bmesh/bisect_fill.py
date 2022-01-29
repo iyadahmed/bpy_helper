@@ -86,10 +86,10 @@ def bisect_fill(bm: BMesh, plane_co: Vector, plane_normal: Vector):
 
     extra_delauny_input_points = []
     for df in delauny_faces:
-        v0 = delauny_verts_co[df[0]].to_3d()
-        v1 = delauny_verts_co[df[1]].to_3d()
-        v2 = delauny_verts_co[df[2]].to_3d()
-        extra_delauny_input_points.extend(co.to_2d() for co in sample_tri_rand_desnity(v0, v1, v2, 10))
+        v0 = delauny_verts_co[df[0]]
+        v1 = delauny_verts_co[df[1]]
+        v2 = delauny_verts_co[df[2]]
+        extra_delauny_input_points.extend(co for co in sample_tri_rand_desnity(v0, v1, v2, 10))
 
     (
         delauny_verts_co,
