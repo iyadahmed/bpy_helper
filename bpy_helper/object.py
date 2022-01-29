@@ -103,7 +103,7 @@ def set_origin(obj: bpy.types.Object, location: Vector):
 
 
 def get_center_bounds(obj: bpy.types.Object, axis="z", dir="-"):
-    # get origins for any point in bounding box by changing axis and + or -
+    """Get bounding box center snapped to face pointing to a positive or negative axis"""
     bb_center = sum((v.co / 8 for v in obj.bound_box), Vector())
     if dir == "-":
         bb_center[axis] = min(v.co[axis] for v in obj.bound_box)
