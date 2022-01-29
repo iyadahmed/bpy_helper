@@ -6,6 +6,7 @@ import bmesh
 
 from .bmesh.bmesh import bm_loose_parts
 
+from mathutils import Matrix, Vector
 
 def obj_mesh_copy(obj: bpy.types.Object):
     bm = bmesh.new(use_operators=False)
@@ -92,3 +93,25 @@ def select_object(context: bpy.types.Context, obj: bpy.types.Object):
 def activate_object(context: bpy.types.Context, obj: bpy.types.Object):
     select_object(context, obj)  # objects cannot be active if they are not selected
     context.view_layer.objects.active = obj
+
+def set_origin(obj, location, matrix=Matrix()):
+    # object, xyz location
+    # move an object to a xyz vector
+    me = obj.data
+    mw = obj.matrix_world
+    location = matrix.inverted() @ location
+    me.transform(Matrix.Translation(-location))
+    mw.translation = mw @ location
+
+def get_center_bounds(obj, axis="z", dir="-", matrix=Matrix()):
+    # get origins for any point in bounding box by changing axis and + or -
+    local_verts = [matrix @ Vector(v[:]) for v in obj.bound_box]
+    location = sum(local_verts, Vector()) / 8
+    if dir == "-":
+        location[axis] = min(v[axis] for v in local_verts)
+    else:
+        location[axis] = max(v[axis] for v in local_verts)
+    return location
+
+def move_object_to_object(objMoveFrom,objMoveTo):
+    objMoveFrom.matrix_world.translation = objMoveTo.matrix_world.translation.copy()
