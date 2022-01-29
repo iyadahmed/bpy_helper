@@ -35,7 +35,7 @@ def project_point_to_plane(point_co, plane_co, plane_normal):
 
 def bisect_fill(bm: BMesh, plane_co: Vector, plane_normal: Vector):
     plane_co = Vector(plane_co)
-    plane_normal = Vector(plane_normal)
+    plane_normal = Vector(plane_normal).normalized()
     geom_cut = bmesh.ops.bisect_plane(
         bm,
         geom=bm.faces[:] + bm.edges[:] + bm.verts[:],
@@ -65,13 +65,9 @@ def bisect_fill(bm: BMesh, plane_co: Vector, plane_normal: Vector):
         delauny_edges_input.append((v0_index, v1_index))
 
     rot_mat = plane_normal.rotation_difference((0, 0, 1)).to_matrix()
-    rot_mat_t = rot_mat.transposed()
     rot_mat_inv = rot_mat.inverted_safe()
-    rot_mat_inv_t = rot_mat_inv.transposed()
 
-    delauny_input_verts_co = [
-        (rot_mat_inv_t @ project_point_to_plane(v.co, plane_co, plane_normal))[:2] for v in delauny_verts_input
-    ]
+    delauny_input_verts_co = [(rot_mat @ v.co).to_2d() for v in delauny_verts_input]
 
     (
         delauny_verts_co,
@@ -111,7 +107,8 @@ def bisect_fill(bm: BMesh, plane_co: Vector, plane_normal: Vector):
     )
 
     delauny_verts_bm_out = [
-        bm.verts.new(project_point_to_plane(rot_mat_t @ co.to_3d(), plane_co, plane_normal)) for co in delauny_verts_co
+        bm.verts.new(project_point_to_plane(rot_mat_inv @ co.to_3d(), plane_co, plane_normal))
+        for co in delauny_verts_co
     ]
 
     for df in delauny_faces:
