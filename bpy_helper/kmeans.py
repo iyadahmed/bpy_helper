@@ -1,4 +1,4 @@
-from typing import Any, Iterable, List
+from typing import Any, Iterable
 
 
 class KMeansNode:
@@ -10,30 +10,40 @@ class KMeansNode:
         return f"<{self.data}, {self.value}>"
 
 
+# Can use a set instead
+class KMeansCluster(list):
+    def __init__(self, centroid: float) -> None:
+        super().__init__()
+        self._centroid = centroid
+
+    @property
+    def centroid(self):
+        return self._centroid
+
+    def add_node(self, node: KMeansNode):
+        old_len = len(self)
+        if old_len == 0:
+            self._centroid = node.value
+        else:
+            self._centroid = (self._centroid + (node.value / old_len)) / (1 + 1 / old_len)
+        self.append(node)
+
+
 def k_means_min_max(nodes: Iterable[KMeansNode]):
     """Divide nodes into two clusters, with min and max values as initial centroids"""
     min_node = min(nodes, key=lambda node: node.value)
     max_node = max(nodes, key=lambda node: node.value)
 
-    min_centroid = min_node.value
-    max_centroid = max_node.value
-
-    min_cluster: List[KMeansNode] = []
-    min_cluster_sum = 0  # TODO: Avoid floating point precision issues when accumlating
-    max_cluster: List[KMeansNode] = []
-    max_cluster_sum = 0
+    min_cluster = KMeansCluster(min_node.value)
+    max_cluster = KMeansCluster(max_node.value)
 
     for node in nodes:
-        dist_to_min = abs(min_centroid - node.value)
-        dist_to_max = abs(max_centroid - node.value)
+        dist_to_min = abs(min_cluster.centroid - node.value)
+        dist_to_max = abs(max_cluster.centroid - node.value)
 
         if dist_to_min < dist_to_max:
-            min_cluster.append(node)
-            min_cluster_sum += node.value
-            min_centroid = min_cluster_sum / len(min_cluster)
+            min_cluster.add_node(node)
         else:
-            max_cluster.append(node)
-            max_cluster_sum += node.value
-            max_centroid = max_cluster_sum / len(max_cluster)
+            max_cluster.add_node(node)
 
     return min_cluster, max_cluster
