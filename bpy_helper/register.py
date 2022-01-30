@@ -16,7 +16,6 @@ def cleanse_modules(parent_module_name):
 class ModuleRegisterHelper:
     def __init__(self, parent_module_name: str, module_names: List[str]) -> None:
         self._parent_module_name = parent_module_name
-        print(parent_module_name)
         self.modules = [importlib.import_module(f"{parent_module_name}.{name}") for name in module_names]
 
     def register(self):
