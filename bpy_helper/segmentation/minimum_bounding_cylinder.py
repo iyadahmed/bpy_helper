@@ -20,7 +20,7 @@ class Cylinder:
         return np.pi * self.radius * self.radius * self.depth
 
     def to_object(self, mat: Matrix):
-        mat = mat @ Vector(self.up).rotation_difference((0, 0, 1))
+        mat = mat @ Vector(self.up).rotation_difference((0, 0, 1)).to_matrix().to_4x4()
         mat.translation = self.center
         bm = bmesh.new(use_operators=True)
         bmesh.ops.create_cone(
@@ -83,7 +83,7 @@ def pseudo_minimum_bounding_cylinder(obj):
         radius = np.sqrt((verts_co_pca_proj * verts_co_pca_proj).sum(axis=1)).max()
         depth = dims_pca[indices[2]]
         up = axes[indices[2]]
-        cylinders.append(Cylinder(radius, depth, up))
+        cylinders.append(Cylinder(radius, depth, center, up))
 
     min_cylinder = min(cylinders, key=lambda c: c.calc_volume())
     return min_cylinder
