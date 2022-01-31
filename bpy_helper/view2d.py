@@ -40,12 +40,8 @@ class Rect:
 
 def view_to_region_rect(rect: Rect, view2d: bpy.types.View2D, clip: bool = False):
     new_rect = Rect()
-    new_rect.xmin, new_rect.ymin = view2d.view_to_region(
-        rect.xmin, rect.ymin, clip=clip
-    )
-    new_rect.xmax, new_rect.ymax = view2d.view_to_region(
-        rect.xmax, rect.ymax, clip=clip
-    )
+    new_rect.xmin, new_rect.ymin = view2d.view_to_region(rect.xmin, rect.ymin, clip=clip)
+    new_rect.xmax, new_rect.ymax = view2d.view_to_region(rect.xmax, rect.ymax, clip=clip)
     return new_rect
 
 
