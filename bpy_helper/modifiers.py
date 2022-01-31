@@ -12,8 +12,6 @@ def apply_modifiers(context: bpy.types.Context, obj: bpy.types.Object, target_mo
         viewport_visibility_original[mod] = mod.show_viewport
         mod.show_viewport = False
 
-    # No need to store original visibility for target mods
-    # they shall be deleted soon
     for mod in target_mods:
         mod.show_viewport = True
 
