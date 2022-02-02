@@ -75,7 +75,7 @@ def bm_extrude_faces_move(
     return wavefront_faces, side_faces
 
 
-def bm_extrude_face_move_steps(bm: BMesh, faces_to_be_extruded: List[BMFace], translation: Vector, num_steps: int):
+def bm_extrude_faces_move_steps(bm: BMesh, faces_to_be_extruded: List[BMFace], translation: Vector, num_steps: int):
     total_distance = translation.length
     extrude_normal = translation / total_distance
     if num_steps < 1:
