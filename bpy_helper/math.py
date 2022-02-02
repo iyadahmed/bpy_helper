@@ -1,5 +1,7 @@
-from mathutils import Matrix, Vector
+from typing import Iterable
+
 import numpy as np
+from mathutils import Matrix, Vector
 
 
 def det_2x2(mat) -> float:
@@ -45,3 +47,7 @@ def transform_normal_np(mat_3x3: np.ndarray, vec3: np.ndarray):
 
 def transform_normal(mat: Matrix, vec: Vector) -> Vector:
     return mat.inverted_safe().transposed() @ vec
+
+
+def vector_mean(vectors: Iterable[Vector]):
+    return sum(vectors, Vector())
