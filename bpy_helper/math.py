@@ -50,4 +50,4 @@ def transform_normal(mat: Matrix, vec: Vector) -> Vector:
 
 
 def vector_mean(vectors: Iterable[Vector]):
-    return sum(vectors, Vector())
+    return sum((co / len(vectors) for co in vectors), Vector())
