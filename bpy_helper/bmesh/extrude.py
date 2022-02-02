@@ -1,4 +1,5 @@
 from cProfile import Profile
+from itertools import count
 from pstats import SortKey
 import bmesh
 from typing import List, Set
@@ -89,7 +90,7 @@ def bm_extrude_faces_move_normal(
                 if e.tag:
                     continue
                 # TODO: support edges with more than two linked faces
-                is_extrusion_boundary = len(e.link_faces) == 1
+                is_extrusion_boundary = len([f for f in e.link_faces if f.tag]) == 1
                 if is_extrusion_boundary:
                     nv0 = vert_map[e.verts[0]]
                     nv1 = vert_map[e.verts[1]]
