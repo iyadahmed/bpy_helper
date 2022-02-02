@@ -75,14 +75,15 @@ def bm_extrude_faces_move_normal(
         extrude_map = dict()
 
         for f in faces_to_be_extruded:
-            # new_verts = []
+            new_verts = []
             for v in f.verts:
                 if not v.tag:
                     new_vert = bm.verts.new(v.co + v.normal * move_distance_along_normals)
                     extrude_map[v] = new_vert
                     v.tag = True
-                # else:
-                #     new_verts.append(extrude_map[v])
+                else:
+                    new_vert = extrude_map[v]
+                new_verts.append(new_vert)
 
             for e in f.edges:
                 if e.tag:
@@ -103,7 +104,7 @@ def bm_extrude_faces_move_normal(
                     side_faces.append(face)
                     e.tag = True
 
-            new_face = bm.faces.new([extrude_map[v] for v in f.verts])
+            new_face = bm.faces.new(new_verts)
             extrude_map[f] = new_face
             wavefront_faces.append(new_face)
 
