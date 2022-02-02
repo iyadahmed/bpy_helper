@@ -42,8 +42,8 @@ def align_object_to_verts(obj: Object, verts: Iterable[Union[MeshVertex, BMVert]
     """Align an object to a plane with mean of vertex normals and goes through mean of vertex locations"""
     # get the rotation
     rot_quat, _ = get_verts_flattened(verts)
-    avgVert = vector_mean(v.co for v in verts)
+    avg_co = vector_mean(v.co for v in verts)
     # I like to move it move it
-    obj.matrix_world = obj.matrix_world @ Matrix.Translation(avgVert)
+    obj.matrix_world = obj.matrix_world @ Matrix.Translation(avg_co)
     # rotate AFTER move
     obj.rotation_euler.rotate(rot_quat.conjugated())
