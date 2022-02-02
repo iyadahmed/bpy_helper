@@ -51,3 +51,11 @@ def transform_normal(mat: Matrix, vec: Vector) -> Vector:
 
 def vector_mean(vectors: Iterable[Vector]):
     return sum((co / len(vectors) for co in vectors), Vector())
+
+
+def sample_tri(a: Vector, b: Vector, c: Vector, u: float, v: float):
+    """Sample a point inside triangle using two values u and v in range [0., 1.]"""
+    if (u + v) > 1:
+        u = 1 - u
+        v = 1 - v
+    return c + u * (a - c) + v * (b - c)
