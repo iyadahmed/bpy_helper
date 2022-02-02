@@ -1,3 +1,5 @@
+from cProfile import Profile
+from pstats import SortKey
 import bmesh
 from typing import List
 from mathutils import Vector
@@ -42,6 +44,76 @@ def bm_extrude_faces_move(bm: bmesh.types.BMesh, faces_to_be_extruded: List[bmes
         wavefront_faces.append(new_face)
 
     bmesh.ops.delete(bm, geom=faces_to_be_extruded, context="FACES")
+    return wavefront_faces
+
+
+def bm_extrude_faces_move_normal(
+    bm: bmesh.types.BMesh,
+    faces_to_be_extruded: List[bmesh.types.BMFace],
+    move_distance_along_normals: float,
+    delete_input_faces: bool = True,
+):
+    with Profile() as profile:
+        for v in bm.verts:
+            v.tag = False
+
+        for e in bm.edges:
+            e.tag = False
+
+        for f in bm.faces:
+            f.tag = False
+
+        for f in faces_to_be_extruded:
+            f.tag = True
+
+        v: bmesh.types.BMVert
+        e: bmesh.types.BMEdge
+        f: bmesh.types.BMFace
+
+        wavefront_faces: List[bmesh.types.BMFace] = []
+        side_faces: List[bmesh.types.BMFace] = []
+        extrude_map = dict()
+
+        for f in faces_to_be_extruded:
+            # new_verts = []
+            for v in f.verts:
+                if not v.tag:
+                    new_vert = bm.verts.new(v.co + v.normal * move_distance_along_normals)
+                    extrude_map[v] = new_vert
+                    v.tag = True
+                # else:
+                #     new_verts.append(extrude_map[v])
+
+            for e in f.edges:
+                if e.tag:
+                    continue
+                # TODO: support edges with more than two linked faces
+                is_extrusion_boundary = len(e.link_faces) == 1
+                if is_extrusion_boundary:
+                    new_edge = bm.edges.new((extrude_map[e.verts[0]], extrude_map[e.verts[1]]))
+                    extrude_map[e] = new_edge
+                    face = bm.faces.new(
+                        (
+                            e.verts[1],
+                            e.verts[0],
+                            new_edge.verts[0],
+                            new_edge.verts[1],
+                        )
+                    )
+                    side_faces.append(face)
+                    e.tag = True
+
+            new_face = bm.faces.new([extrude_map[v] for v in f.verts])
+            extrude_map[f] = new_face
+            wavefront_faces.append(new_face)
+
+        if delete_input_faces:
+            bmesh.ops.delete(bm, geom=faces_to_be_extruded, context="FACES")
+
+        bmesh.ops.recalc_face_normals(bm, faces=wavefront_faces + side_faces)
+
+    profile.print_stats(SortKey.TIME)
+
     return wavefront_faces
 
 
