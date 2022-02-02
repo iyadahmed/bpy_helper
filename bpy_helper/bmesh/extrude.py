@@ -83,4 +83,4 @@ def bm_extrude_face_move_steps(bm: BMesh, faces_to_be_extruded: List[BMFace], tr
     step_distance = total_distance / num_steps
     extrude_translation = extrude_normal * step_distance
     for _ in range(num_steps):
-        faces_to_be_extruded = bm_extrude_faces_move(bm, faces_to_be_extruded, extrude_translation)
+        faces_to_be_extruded, _ = bm_extrude_faces_move(bm, faces_to_be_extruded, extrude_translation)
