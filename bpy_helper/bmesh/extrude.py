@@ -12,36 +12,33 @@ def bm_extrude_faces_move(
     translation: Vector,
     delete_input_faces: bool = True,
 ):
-    for v in bm.verts:
-        v.tag = False
-
-    for e in bm.edges:
-        e.tag = False
-
     for f in bm.faces:
         f.tag = False
 
     for f in faces_to_be_extruded:
         f.tag = True
+        for v in f.verts:
+            v.tag = False
+        for e in f.edges:
+            e.tag = False
 
     v: BMVert
     e: BMEdge
     f: BMFace
 
     wavefront_faces: List[BMFace] = []
-    side_faces: List[BMFace] = []
     vert_map: Dict[BMVert, BMVert] = dict()  # Maps verts to extruded verts
 
     for f in faces_to_be_extruded:
-        new_verts = []
-        for v in f.verts:
+        new_verts = [None] * len(f.verts)
+        for i, v in enumerate(f.verts):
             if not v.tag:
                 new_vert = bm.verts.new(v.co + translation)
                 vert_map[v] = new_vert
                 v.tag = True
             else:
                 new_vert = vert_map[v]
-            new_verts.append(new_vert)
+            new_verts[i] = new_vert
 
         # Extrude extrusion faces edge boundary
         for e in f.edges:
@@ -54,15 +51,7 @@ def bm_extrude_faces_move(
 
             nv0 = vert_map[e.verts[0]]
             nv1 = vert_map[e.verts[1]]
-            face = bm.faces.new(
-                (
-                    e.verts[1],
-                    e.verts[0],
-                    nv0,
-                    nv1,
-                )
-            )
-            side_faces.append(face)
+            bm.faces.new((e.verts[1], e.verts[0], nv0, nv1))
             e.tag = True
 
         new_face = bm.faces.new(new_verts)
@@ -71,8 +60,7 @@ def bm_extrude_faces_move(
     if delete_input_faces:
         bmesh.ops.delete(bm, geom=faces_to_be_extruded, context="FACES")
 
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    return wavefront_faces, side_faces
+    return wavefront_faces
 
 
 def bm_extrude_faces_move_steps(bm: BMesh, faces_to_be_extruded: List[BMFace], translation: Vector, num_steps: int):
