@@ -79,6 +79,8 @@ def bm_extrude_faces_move(
     return wavefront_faces, side_edge_ring
 
 
-def bm_extrude_faces_move_steps(bm: BMesh, faces_to_be_extruded: List[BMFace], translation: Vector, num_steps: int):
-    _, side_edge_ring = bm_extrude_faces_move(bm, faces_to_be_extruded, translation)
+def bm_extrude_faces_move_steps(
+    bm: BMesh, faces_to_be_extruded: List[BMFace], translation: Vector, num_steps: int, delete_input_faces: bool = True
+):
+    _, side_edge_ring = bm_extrude_faces_move(bm, faces_to_be_extruded, translation, delete_input_faces)
     bmesh.ops.subdivide_edgering(bm, edges=list(side_edge_ring), interp_mode="LINEAR", smooth=0.0, cuts=num_steps)
