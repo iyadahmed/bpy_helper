@@ -6,7 +6,7 @@ import bpy
 import numpy as np
 from mathutils import Matrix, Vector
 
-from ..bmesh.bmesh import bmesh_to_object
+from ..bmesh.loose_parts import bmesh_to_object
 
 
 @dataclass

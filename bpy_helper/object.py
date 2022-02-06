@@ -5,7 +5,7 @@ from mathutils import Matrix, Vector
 
 import bmesh
 
-from .bmesh.bmesh import bm_loose_parts
+from .bmesh.loose_parts import bm_loose_parts
 
 
 def obj_mesh_copy(obj: bpy.types.Object):
@@ -114,3 +114,19 @@ def get_center_bounds(obj: bpy.types.Object, axis="z", dir="-"):
 
 def obj_copy_translation(obj_from: bpy.types.Object, obj_to: bpy.types.Object):
     obj_to.matrix_world.translation = obj_from.matrix_world.translation.copy()
+
+
+def obj_remove_small_parts(obj: bpy.types.Object):
+    assert obj.type == "MESH"
+    bm = bmesh.new(use_operators=False)
+    mesh: bpy.types.Mesh = obj.data
+    bm.from_mesh(mesh)
+    loose_parts = bm_loose_parts(bm)
+    for lp in loose_parts:
+        lp.update_bounding_box()
+    for lp in sorted(loose_parts, key=lambda lp: (lp.bb_max - lp.bb_min).length_squared)[:-1]:
+        for v in lp.verts:
+            bm.verts.remove(v)
+    bm.to_mesh(mesh)
+    mesh.update()
+    bm.free()
