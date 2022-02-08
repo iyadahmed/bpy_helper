@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Type, Set
-
 from traceback import print_exc
+from typing import Set, Type
 
 import blf
 import bpy

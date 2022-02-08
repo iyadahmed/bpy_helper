@@ -1,6 +1,5 @@
 from typing import Callable, List
 
-import bpy
 import numpy as np
 from mathutils import Vector
 
