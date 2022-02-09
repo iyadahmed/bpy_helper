@@ -104,10 +104,14 @@ class DrawGeometry3D(AbstractDrawHandler):
     def init(self) -> None:
         self.verts = []
         self.tris_vert_indices = []
+        self.color = (0.0, 0.0, 1.0, 0.75)
 
     def set_geometry(self, verts, triangles):
         self.verts = deepcopy(verts)
         self.tris_vert_indices = deepcopy(triangles)
+
+    def set_color(self, color):
+        self.color = deepcopy(color)
 
     def draw(self) -> None:
         shader: gpu.types.GPUShader = gpu.shader.from_builtin("3D_UNIFORM_COLOR")
@@ -118,7 +122,7 @@ class DrawGeometry3D(AbstractDrawHandler):
             indices=self.tris_vert_indices,
         )
         shader.bind()
-        shader.uniform_float("color", (0.0, 0.0, 1.0, 0.75))
+        shader.uniform_float("color", self.color)
         gpu.state.blend_set("ALPHA")
         batch.draw(shader)
         gpu.state.blend_set("NONE")
