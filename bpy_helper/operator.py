@@ -28,7 +28,9 @@ class MultiStateModal(bpy.types.Operator):
 
     def modal(self, context: bpy.types.Context, event: bpy.types.Event):
         try:
-            context.area.tag_redraw()
+            if context.area is not None:
+                # Area can be sometimes None
+                context.area.tag_redraw()
             retval = self.pre_modal_handler(context, event)
             if retval == {"RUNNING_MODAL"}:
                 if self._modal_handler:
