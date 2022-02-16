@@ -85,7 +85,11 @@ def modal_update_float_input_string_unsigned(op: bpy.types.Operator, event: bpy.
 
     setattr(op, string_property_name, new_str)
     try:
-        return float(new_str)
+        if new_str == ".":
+            value = 0.0
+        else:
+            value = float(new_str)
+        return value
     except Exception:
         setattr(op, string_property_name, "")
         return None
