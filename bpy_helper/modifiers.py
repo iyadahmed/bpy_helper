@@ -69,3 +69,10 @@ def create_triangulate_modifier(obj: bpy.types.Object):
     mod.quad_method = "BEAUTY"
     mod.ngon_method = "BEAUTY"
     return mod
+
+
+def create_solidify_modifier_rim_only(obj: bpy.types.Object, thickness=0.1):
+    mod: bpy.types.SolidifyModifier = obj.modifiers.new("", "SOLIDIFY")
+    mod.use_rim_only = True
+    mod.thickness = thickness
+    return mod
