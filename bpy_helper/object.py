@@ -9,12 +9,9 @@ from .bmesh.loose_parts import bm_loose_parts
 
 
 def obj_mesh_copy(obj: bpy.types.Object):
-    bm = bmesh.new(use_operators=False)
-    bm.from_mesh(obj.data)
-    new_mesh = bpy.data.meshes.new(obj.name + "_copy")
-    bm.to_mesh(new_mesh)
-    new_mesh.update()
-    new_obj = bpy.data.objects.new(obj.name + "_copy", new_mesh)
+    assert obj.type == "MESH"
+    new_obj = obj.copy()
+    new_obj.data = bpy.data.meshes.new_from_object(obj)
     new_obj.use_fake_user = True
     return new_obj
 
