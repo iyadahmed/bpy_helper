@@ -79,6 +79,9 @@ def circumcircle(a, b, c):
     y_y = w1.dot(v)
 
     h = (y_x - x_x / 2) ** 2 + y_y**2 - (x_x / 2) ** 2
+    if abs(y_y) < 0.00001:
+        return None
+
     h /= 2 * y_y
 
     return a + (x_x / 2) * u + h * v
