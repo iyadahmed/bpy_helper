@@ -59,3 +59,26 @@ def sample_tri(a: Vector, b: Vector, c: Vector, u: float, v: float):
         u = 1 - u
         v = 1 - v
     return c + u * (a - c) + v * (b - c)
+
+
+def circumcircle(a, b, c):
+    """Calculates center of circle going through 3 points a, b, c"""
+
+    # https://math.stackexchange.com/a/1743505/691043
+    u1 = b - a
+    w1 = c - a
+
+    # Unit vectors for plane containing the three points
+    u = u1.normalized()
+    w = w1.cross(u1).normalized()
+    v = w.cross(u)
+
+    # Project points into the plane
+    x_x = u1.dot(u)
+    y_x = w1.dot(u)
+    y_y = w1.dot(v)
+
+    h = (y_x - x_x / 2) ** 2 + y_y**2 - (x_x / 2) ** 2
+    h /= 2 * y_y
+
+    return a + (x_x / 2) * u + h * v
