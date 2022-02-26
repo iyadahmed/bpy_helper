@@ -45,7 +45,7 @@ def view_to_region_rect(rect: Rect, view2d: bpy.types.View2D, clip: bool = False
     return new_rect
 
 
-def abs_node_location(node):
+def abs_node_location(node: bpy.types.Node):
     abs_location = node.location
     if node.parent is None:
         return abs_location
@@ -70,7 +70,7 @@ def get_widget_unit():
     return widget_unit
 
 
-def NODE_WIDTH(node):
+def NODE_WIDTH(node: bpy.types.Node):
     sys_prefs = bpy.context.preferences.system
     dpi_fac = sys_prefs.ui_scale
     return node.width * dpi_fac
