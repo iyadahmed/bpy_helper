@@ -74,3 +74,10 @@ def NODE_WIDTH(node):
     sys_prefs = bpy.context.preferences.system
     dpi_fac = sys_prefs.ui_scale
     return node.width * dpi_fac
+
+
+def NODE_HEIGHT(node: bpy.types.Node):
+    """Node height with UI scale taken into account"""
+    sys_prefs = bpy.context.preferences.system
+    dpi_fac = sys_prefs.ui_scale
+    return node.height * dpi_fac
