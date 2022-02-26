@@ -10,6 +10,12 @@ from bmesh.types import BMVert
 from .math import vector_mean
 
 
+def shade_flat(mesh: bpy.types.Mesh):
+    num_poly = len(mesh.polygons)
+    mesh.polygons.foreach_set("use_smooth", (False,) * num_poly)
+    mesh.update()
+
+
 def fatten_even(mesh: bpy.types.Mesh, distance: float = 1.0):
     bm = bmesh.new(use_operators=False)
     bm.from_mesh(mesh)

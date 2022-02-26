@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Type, Set
-
+from copy import deepcopy
 from traceback import print_exc
+from typing import Set, Type
 
 import blf
 import bpy
+import gpu
+from gpu_extras.batch import batch_for_shader
 
 REGISTERED_DRAW_HANDLERS_GLOBAL: Set["AbstractDrawHandler"] = set()
 
@@ -92,6 +94,38 @@ class DrawView3DText(AbstractDrawHandler):
             blf.position(font_id, pos_x, pos_y, pos_z)
             blf.draw(font_id, line)
             pos_y -= font_size + line_spacing
+
+
+class DrawGeometry3D(AbstractDrawHandler):
+    space_type = bpy.types.SpaceView3D
+    draw_type = "POST_VIEW"
+    region_type = "WINDOW"
+
+    def init(self) -> None:
+        self.verts = []
+        self.tris_vert_indices = []
+        self.color = (0.0, 0.0, 1.0, 0.75)
+
+    def set_geometry(self, verts, triangles):
+        self.verts = deepcopy(verts)
+        self.tris_vert_indices = deepcopy(triangles)
+
+    def set_color(self, color):
+        self.color = deepcopy(color)
+
+    def draw(self) -> None:
+        shader: gpu.types.GPUShader = gpu.shader.from_builtin("3D_UNIFORM_COLOR")
+        batch: gpu.types.GPUBatch = batch_for_shader(
+            shader,
+            "TRIS",
+            {"pos": self.verts},
+            indices=self.tris_vert_indices,
+        )
+        shader.bind()
+        shader.uniform_float("color", self.color)
+        gpu.state.blend_set("ALPHA")
+        batch.draw(shader)
+        gpu.state.blend_set("NONE")
 
 
 def unregister_all_draw_handlers():

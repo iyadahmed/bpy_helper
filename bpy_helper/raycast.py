@@ -18,9 +18,9 @@ class RayHit:
         return self.is_hit
 
 
-def ray_cast_scene(context: bpy.types.Context, ray_origin, ray_target):
+def ray_cast_scene(context: bpy.types.Context, ray_origin, ray_direction):
     dg = context.evaluated_depsgraph_get()
-    is_hit, location, normal, polygon_index, obj, obj_matrix = context.scene.ray_cast(dg, ray_origin, ray_target)
+    is_hit, location, normal, polygon_index, obj, obj_matrix = context.scene.ray_cast(dg, ray_origin, ray_direction)
     return RayHit(is_hit, location, normal, polygon_index, obj, obj_matrix)
 
 
