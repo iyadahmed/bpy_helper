@@ -31,7 +31,7 @@ def apply_modifier_by_name(obj: bpy.types.Object, modifier_name: str):
     apply_modifiers(bpy.context, obj, [obj.modifiers[modifier_name]])
 
 
-def apply_modifer(context: bpy.types.Context, obj: bpy.types.Object, modifier: bpy.types.Modifier):
+def apply_modifier(context: bpy.types.Context, obj: bpy.types.Object, modifier: bpy.types.Modifier):
     apply_modifiers(context, obj, [modifier])
 
 
