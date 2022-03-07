@@ -31,6 +31,10 @@ def apply_modifier_by_name(obj: bpy.types.Object, modifier_name: str):
     apply_modifiers(bpy.context, obj, [obj.modifiers[modifier_name]])
 
 
+def apply_modifer(context: bpy.types.Context, obj: bpy.types.Object, modifier: bpy.types.Modifier):
+    apply_modifiers(context, obj, [modifier])
+
+
 def create_boolean_modifier_obj_obj_fast(obj_first, obj_second, operation):
     mod: bpy.types.BooleanModifier = obj_first.modifiers.new("", "BOOLEAN")
     mod.solver = "FAST"
