@@ -1,14 +1,28 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from traceback import print_exc
-from typing import Set, Type
+from typing import Set, Type, Tuple, List
 
 import blf
+import bgl
 import bpy
 import gpu
 from gpu_extras.batch import batch_for_shader
 
 REGISTERED_DRAW_HANDLERS_GLOBAL: Set["AbstractDrawHandler"] = set()
+
+color4 = Tuple[float | int, float | int, float | int, float | int]
+pos3 = (
+    Tuple[Tuple[float | int, float | int, float | int], ...]
+    | List[Tuple[float | int, float | int, float | int]]
+)
+indices = (
+    Tuple[
+        (_t2_3 := Tuple[float | int, float | int] | Tuple[float | int, float | int]),
+        ...,
+    ]
+    | List[Tuple[_t2_3]]
+)
 
 
 class AbstractDrawHandler(ABC):
@@ -44,7 +58,9 @@ class AbstractDrawHandler(ABC):
         def draw_unbound(draw_handler):
             draw_handler.draw()
 
-        self.__rna_handle = self.space_type.draw_handler_add(draw_unbound, (self,), self.region_type, self.draw_type)
+        self.__rna_handle = self.space_type.draw_handler_add(
+            draw_unbound, (self,), self.region_type, self.draw_type
+        )
 
     def unregister(self):
         if self.__rna_handle is None:
@@ -60,7 +76,14 @@ class DrawView3DText(AbstractDrawHandler):
     draw_type = "POST_PIXEL"
     region_type = "WINDOW"
 
-    def init(self, pos_x: float = 100, pos_y: float = 60, line_spacing: float = 5, font_size: float = 20) -> None:
+    def init(
+        self,
+        pos_x: float = 100,
+        pos_y: float = 60,
+        line_spacing: float = 5,
+        font_size: float = 20,
+    ) -> None:
+
         self.text = ""
         self._pos_x = pos_x
         self._pos_y = pos_y
@@ -102,15 +125,15 @@ class DrawGeometry3D(AbstractDrawHandler):
     region_type = "WINDOW"
 
     def init(self) -> None:
-        self.verts = []
-        self.tris_vert_indices = []
-        self.color = (0.0, 0.0, 1.0, 0.75)
+        self.verts: pos3 = []
+        self.tris_vert_indices: indices = []
+        self.color: color4 = (0.0, 0.0, 1.0, 0.75)
 
-    def set_geometry(self, verts, triangles):
+    def set_geometry(self, verts: pos3, triangles):
         self.verts = deepcopy(verts)
         self.tris_vert_indices = deepcopy(triangles)
 
-    def set_color(self, color):
+    def set_color(self, color: color4):
         self.color = deepcopy(color)
 
     def draw(self) -> None:
@@ -123,6 +146,44 @@ class DrawGeometry3D(AbstractDrawHandler):
         )
         shader.bind()
         shader.uniform_float("color", self.color)
+        gpu.state.blend_set("ALPHA")
+        batch.draw(shader)
+        gpu.state.blend_set("NONE")
+
+
+class DrawPoints3D(AbstractDrawHandler):
+    space_type = bpy.types.SpaceView3D
+    draw_type = "POST_VIEW"
+    region_type = "WINDOW"
+
+    def init(self) -> None:
+        self.points: pos3 = []
+        self.point_size: float = 5
+        self.color: List[color4] | Tuple[color4, ...] = [(1.0, 1.0, 1.0, 1.0)]
+
+    def set_points(self, verts: pos3):
+        self.points = deepcopy(verts)
+
+    def set_color(self, color: List[color4] | Tuple[color4, ...]):
+        self.color = deepcopy(color)
+
+    def set_size(self, size):
+        self.point_size = deepcopy(size)
+
+    def draw(self) -> None:
+        shader: gpu.types.GPUShader = gpu.shader.from_builtin("3D_FLAT_COLOR")
+        batch: gpu.types.GPUBatch = batch_for_shader(
+            shader,
+            "POINTS",
+            {
+                "pos": self.points,
+                "color": self.color,
+            },
+        )
+
+        bgl.glPointSize(self.point_size)
+        bgl.glEnable(bgl.GL_DEPTH_TEST)
+        shader.bind()
         gpu.state.blend_set("ALPHA")
         batch.draw(shader)
         gpu.state.blend_set("NONE")
