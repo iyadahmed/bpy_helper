@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from traceback import print_exc
-from typing import Set, Type, Tuple, List
+from typing import Set, Type, Tuple, List, Union
 
 import blf
 import bgl
@@ -11,18 +11,14 @@ from gpu_extras.batch import batch_for_shader
 
 REGISTERED_DRAW_HANDLERS_GLOBAL: Set["AbstractDrawHandler"] = set()
 
-color4 = Tuple[float | int, float | int, float | int, float | int]
-pos3 = (
-    Tuple[Tuple[float | int, float | int, float | int], ...]
-    | List[Tuple[float | int, float | int, float | int]]
-)
-indices = (
-    Tuple[
-        (_t2_3 := Tuple[float | int, float | int] | Tuple[float | int, float | int]),
-        ...,
-    ]
-    | List[Tuple[_t2_3]]
-)
+int_or_float = Union[int, float]
+color4 = Tuple[int_or_float, int_or_float, int_or_float, int_or_float]
+pos3 = Union[
+    Tuple[Tuple[int_or_float, int_or_float, int_or_float], ...], List[Tuple[int_or_float, int_or_float, int_or_float]]
+]
+
+_t2_3 = Union[Tuple[int_or_float, int_or_float], Tuple[int_or_float, int_or_float]]
+indices = Union[Tuple[_t2_3, ...], List[Tuple[_t2_3]]]
 
 
 class AbstractDrawHandler(ABC):
@@ -58,9 +54,7 @@ class AbstractDrawHandler(ABC):
         def draw_unbound(draw_handler):
             draw_handler.draw()
 
-        self.__rna_handle = self.space_type.draw_handler_add(
-            draw_unbound, (self,), self.region_type, self.draw_type
-        )
+        self.__rna_handle = self.space_type.draw_handler_add(draw_unbound, (self,), self.region_type, self.draw_type)
 
     def unregister(self):
         if self.__rna_handle is None:
@@ -159,12 +153,12 @@ class DrawPoints3D(AbstractDrawHandler):
     def init(self) -> None:
         self.points: pos3 = []
         self.point_size: float = 5
-        self.color: List[color4] | Tuple[color4, ...] = [(1.0, 1.0, 1.0, 1.0)]
+        self.color: Union[List[color4], Tuple[color4, ...]] = [(1.0, 1.0, 1.0, 1.0)]
 
     def set_points(self, verts: pos3):
         self.points = deepcopy(verts)
 
-    def set_color(self, color: List[color4] | Tuple[color4, ...]):
+    def set_color(self, color: Union[List[color4], Tuple[color4, ...]]):
         self.color = deepcopy(color)
 
     def set_size(self, size):

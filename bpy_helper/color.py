@@ -59,21 +59,20 @@ def hsv_to_rgb(color: tuple[float, float, float]) -> tuple[float, float, float]:
 
     i = i % 6
 
-    match i:
-        case 0:
-            return v, v3, v1
+    if i == 0:
+        return v, v3, v1
 
-        case 1:
-            return v2, v, v1
+    elif i == 1:
+        return v2, v, v1
 
-        case 2:
-            return v1, v, v3
+    elif i == 2:
+        return v1, v, v3
 
-        case 3:
-            return v1, v2, v
+    elif i == 3:
+        return v1, v2, v
 
-        case 4:
-            return v3, v1, v
+    elif i == 4:
+        return v3, v1, v
 
-        case _:
-            return v, v1, v2
+    else:
+        return v, v1, v2
