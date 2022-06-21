@@ -3,6 +3,8 @@ from typing import Iterable
 import numpy as np
 from mathutils import Matrix, Vector
 
+def float_map_range( value, from_min, from_max, to_min, to_max ):
+  return ( value - from_min ) * (( to_max - to_min )/( from_max - from_min )) + to_min
 
 def det_2x2(mat) -> float:
     return mat[0] * mat[3] - mat[1] * mat[2]

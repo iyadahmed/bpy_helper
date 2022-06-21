@@ -2,7 +2,11 @@ import bpy
 from typing import List
 
 
-def apply_modifiers(context: bpy.types.Context, obj: bpy.types.Object, target_mods: List[bpy.types.Modifier]):
+def apply_modifiers(
+    context: bpy.types.Context,
+    obj: bpy.types.Object,
+    target_mods: List[bpy.types.Modifier],
+):
     for mod in target_mods:
         assert mod.id_data == obj
 
@@ -31,7 +35,9 @@ def apply_modifier_by_name(obj: bpy.types.Object, modifier_name: str):
     apply_modifiers(bpy.context, obj, [obj.modifiers[modifier_name]])
 
 
-def apply_modifier(context: bpy.types.Context, obj: bpy.types.Object, modifier: bpy.types.Modifier):
+def apply_modifier(
+    context: bpy.types.Context, obj: bpy.types.Object, modifier: bpy.types.Modifier
+):
     apply_modifiers(context, obj, [modifier])
 
 
@@ -43,7 +49,9 @@ def create_boolean_modifier_obj_obj_fast(obj_first, obj_second, operation):
     return mod
 
 
-def create_boolean_modifier_obj_obj_exact(obj_first, obj_second, operation, use_hole_tolerant=False, use_self=False):
+def create_boolean_modifier_obj_obj_exact(
+    obj_first, obj_second, operation, use_hole_tolerant=False, use_self=False
+):
     mod: bpy.types.BooleanModifier = obj_first.modifiers.new("", "BOOLEAN")
     mod.solver = "EXACT"
     mod.operation = operation
@@ -79,4 +87,15 @@ def create_solidify_modifier_rim_only(obj: bpy.types.Object, thickness=0.1):
     mod: bpy.types.SolidifyModifier = obj.modifiers.new("", "SOLIDIFY")
     mod.use_rim_only = True
     mod.thickness = thickness
+    return mod
+
+
+def create_geometry_nodes_modifier(
+    obj: bpy.types.Object,
+    name: str = "",
+    node_tree: bpy.types.GeometryNodeTree | None = None,
+):
+    mod: bpy.types.GeometryNodesModifier = obj.modifiers.new(name, "GEOMETRY_NODES")
+    if node_tree:
+        mod.node_group = node_tree
     return mod
