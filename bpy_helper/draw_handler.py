@@ -8,13 +8,15 @@ import bgl
 import bpy
 import gpu
 from gpu_extras.batch import batch_for_shader
+from bpy_extras.view3d_utils import location_3d_to_region_2d as vec_3d_2d
 
 REGISTERED_DRAW_HANDLERS_GLOBAL: Set["AbstractDrawHandler"] = set()
 
 int_or_float = Union[int, float]
 color4 = Tuple[int_or_float, int_or_float, int_or_float, int_or_float]
 pos3 = Union[
-    Tuple[Tuple[int_or_float, int_or_float, int_or_float], ...], List[Tuple[int_or_float, int_or_float, int_or_float]]
+    Tuple[Tuple[int_or_float, int_or_float, int_or_float], ...],
+    List[Tuple[int_or_float, int_or_float, int_or_float]],
 ]
 
 _t2_3 = Union[Tuple[int_or_float, int_or_float], Tuple[int_or_float, int_or_float]]
@@ -54,7 +56,9 @@ class AbstractDrawHandler(ABC):
         def draw_unbound(draw_handler):
             draw_handler.draw()
 
-        self.__rna_handle = self.space_type.draw_handler_add(draw_unbound, (self,), self.region_type, self.draw_type)
+        self.__rna_handle = self.space_type.draw_handler_add(
+            draw_unbound, (self,), self.region_type, self.draw_type
+        )
 
     def unregister(self):
         if self.__rna_handle is None:
@@ -76,6 +80,7 @@ class DrawView3DText(AbstractDrawHandler):
         pos_y: float = 60,
         line_spacing: float = 5,
         font_size: float = 20,
+        color: color4 = (1.0, 1.0, 1.0, 1.0),
     ) -> None:
 
         self.text = ""
@@ -83,6 +88,7 @@ class DrawView3DText(AbstractDrawHandler):
         self._pos_y = pos_y
         self._line_spacing = line_spacing
         self._font_size = font_size
+        self._color = color
 
     def set_text(self, text: str) -> None:
         self.text = text
@@ -90,6 +96,9 @@ class DrawView3DText(AbstractDrawHandler):
     def set_position(self, x: float, y: float):
         self._pos_x = x
         self._pos_y = y
+
+    def set_color(self, color: color4):
+        self._color = deepcopy(color)
 
     def set_line_spacing(self, line_spacing: float):
         self._line_spacing = line_spacing
@@ -105,7 +114,7 @@ class DrawView3DText(AbstractDrawHandler):
         pos_y = self._pos_y
         pos_z = 0
         blf.size(font_id, font_size, 72)
-        blf.color(font_id, 1.0, 1.0, 1.0, 1.0)
+        blf.color(font_id, *self._color)
 
         for line in self.text.splitlines():
             blf.position(font_id, pos_x, pos_y, pos_z)
@@ -181,6 +190,55 @@ class DrawPoints3D(AbstractDrawHandler):
         gpu.state.blend_set("ALPHA")
         batch.draw(shader)
         gpu.state.blend_set("NONE")
+
+
+# TODO: needs a better name
+class DrawView2D3DText(AbstractDrawHandler):
+    space_type = bpy.types.SpaceView3D
+    draw_type = "POST_PIXEL"
+    region_type = "WINDOW"
+
+    def init(
+        self,
+        pos_x: float = 0,
+        pos_y: float = 0,
+        pos_z: float = 1,
+        font_size: float = 20,
+    ) -> None:
+        self.text = ""
+        self._pos_x = pos_x
+        self._pos_y = pos_y
+        self._pos_z = pos_z
+        self._font_size = font_size
+        self.color: color4 = (1.0, 1.0, 1.0, 1.0)
+
+    def set_text(self, text: str) -> None:
+        self.text = text
+
+    def set_color(self, color: color4):
+        self.color = deepcopy(color)
+
+    def set_position(self, x: float, y: float, z: float):
+        self._pos_x = x
+        self._pos_y = y
+        self._pos_z = z
+
+    def set_font_size(self, font_size: float):
+        self._font_size = font_size
+
+    def draw(self) -> None:
+        pos_y = self._pos_y
+        font_id = 0
+        v3d = bpy.context.space_data
+        rv3d = v3d.region_3d
+        region = bpy.context.region
+
+        vec = vec_3d_2d(region, rv3d, (self._pos_x, self._pos_y, self._pos_z))
+
+        blf.position(font_id, vec[0], vec[1], 0)
+        blf.size(font_id, self._font_size, 72)
+        blf.draw(font_id, self.text)
+        blf.color(font_id, *self.color)
 
 
 def unregister_all_draw_handlers():
